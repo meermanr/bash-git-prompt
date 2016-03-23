@@ -413,6 +413,13 @@ function checkUpstream() {
   local GIT_PROMPT_FETCH_TIMEOUT
   git_prompt_config
 
+  # Check we own it (avoids creating mixed ownership situations just because we 
+  # have group write permission)
+  if [[ $(ls -nld $(git rev-parse --git-dir) | awk '{print $3;}') != $(id -u) ]]
+  then
+      return
+  fi
+
   local FETCH_HEAD="$repo/.git/FETCH_HEAD"
   # Fech repo if local is stale for more than $GIT_FETCH_TIMEOUT minutes
   if [[ ! -e "$FETCH_HEAD" ]] || olderThanMinutes "$FETCH_HEAD" "$GIT_PROMPT_FETCH_TIMEOUT"
